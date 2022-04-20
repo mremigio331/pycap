@@ -75,8 +75,10 @@ if ('-h' in sys.argv) or ('-help' in sys.argv):
     The -h or -help flag will print in the terminal all available flags
     """
     print('*** Commands ***')
-    print('-g  -gephi       analyzes pcap and exports file for gephi')
-    print('-O  -outfile       declares the filename')
+    print('-g  -gephi      analyzes pcap and exports file for gephi')
+    print('-O  -outfile    declares the filename')
+    print('-p  -pcap       identifies the pcap file')
+    print('-s  -stats      prints statistical data from the pcap')
 
 
 
