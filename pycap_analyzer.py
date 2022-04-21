@@ -39,90 +39,94 @@ def analyzer_loop(pcaps,name_lookup):
     time_bar = len(pcaps)
     with alive_bar(time_bar) as bar:
         for x in pcaps:
-            source_ip = x['_source']['layers']['ip']['ip.src']
-            destination_ip = x['_source']['layers']['ip']['ip.addr']
-            src_host = x['_source']['layers']['ip']['ip.src_host']
+            try:
+                source_ip = x['_source']['layers']['ip']['ip.src']
+                destination_ip = x['_source']['layers']['ip']['ip.addr']
+                src_host = x['_source']['layers']['ip']['ip.src_host']
 
-            if source_ip in total_ips['ips']:
-                source_count = total_ips['ips'][source_ip]['source_count']
-                source_count = source_count + 1
-                total_ips['ips'][source_ip].update({'source_count': source_count})
+                if source_ip in total_ips['ips']:
+                    source_count = total_ips['ips'][source_ip]['source_count']
+                    source_count = source_count + 1
+                    total_ips['ips'][source_ip].update({'source_count': source_count})
 
-                if source_ip not in source_ips_list:
-                    source_ips_list.append(source_ip)
+                    if source_ip not in source_ips_list:
+                        source_ips_list.append(source_ip)
 
-                if name_lookup is True:
-                    try:
-                        if source_ip != src_host and source_ip not in host_names:
-                            host_names.append(source_ip)
-                            add_name = [src_host]
-                            total_ips['ips'][source_ip].update({'name': add_name})
+                    if name_lookup is True:
+                        try:
+                            if source_ip != src_host and source_ip not in host_names:
+                                host_names.append(source_ip)
+                                add_name = [src_host]
+                                total_ips['ips'][source_ip].update({'name': add_name})
 
-                        if source_ip != src_host and source_ip in host_names:
-                            names = total_ips['ips'][source_ip]['name']
-                            if src_host not in names:
-                                names.append(src_host)
-                                total_ips['ips'][source_ip].update({'name': names})
+                            if source_ip != src_host and source_ip in host_names:
+                                names = total_ips['ips'][source_ip]['name']
+                                if src_host not in names:
+                                    names.append(src_host)
+                                    total_ips['ips'][source_ip].update({'name': names})
 
-                    except:
-                        pass
+                        except:
+                            pass
 
-            if destination_ip in total_ips['ips']:
-                if destination_ip not in destination_ips_list:
-                    destination_ips_list.append(destination_ip)
+                if destination_ip in total_ips['ips']:
+                    if destination_ip not in destination_ips_list:
+                        destination_ips_list.append(destination_ip)
 
-                destination_count = total_ips['ips'][destination_ip]['destination_count']
-                destination_count = destination_count + 1
-                total_ips['ips'][destination_ip].update({'destination_count': destination_count})
+                    destination_count = total_ips['ips'][destination_ip]['destination_count']
+                    destination_count = destination_count + 1
+                    total_ips['ips'][destination_ip].update({'destination_count': destination_count})
 
-            if source_ip not in total_ips['ips']:
+                if source_ip not in total_ips['ips']:
 
-                if source_ip not in source_ips_list:
-                    source_ips_list.append(source_ip)
+                    if source_ip not in source_ips_list:
+                        source_ips_list.append(source_ip)
 
-                source_ip_info = {source_ip: {'ip': source_ip,
-                                              'name': '',
-                                              'source_count': 1,
-                                              'destination_count': 0,
-                                              'total_count': 0,
-                                              'virus_total': '',
-                                              'country': '',
-                                              'region': ''
-                                              }
-                                  }
-                total_ips['ips'].update(source_ip_info)
+                    source_ip_info = {source_ip: {'ip': source_ip,
+                                                  'name': '',
+                                                  'source_count': 1,
+                                                  'destination_count': 0,
+                                                  'total_count': 0,
+                                                  'virus_total': '',
+                                                  'country': '',
+                                                  'region': ''
+                                                  }
+                                      }
+                    total_ips['ips'].update(source_ip_info)
 
-                if name_lookup is True:
-                    try:
-                        if source_ip != src_host and source_ip not in host_names:
-                            host_names.append(source_ip)
-                            add_name = [src_host]
-                            total_ips['ips'][source_ip].update({'name': add_name})
+                    if name_lookup is True:
+                        try:
+                            if source_ip != src_host and source_ip not in host_names:
+                                host_names.append(source_ip)
+                                add_name = [src_host]
+                                total_ips['ips'][source_ip].update({'name': add_name})
 
-                        if source_ip != src_host and source_ip in host_names:
-                            names = total_ips['ips'][source_ip]['name']
-                            if src_host not in names:
-                                names.append(src_host)
-                                total_ips['ips'][source_ip].update({'name': names})
+                            if source_ip != src_host and source_ip in host_names:
+                                names = total_ips['ips'][source_ip]['name']
+                                if src_host not in names:
+                                    names.append(src_host)
+                                    total_ips['ips'][source_ip].update({'name': names})
 
-                    except:
-                        pass
+                        except:
+                            pass
 
-            if destination_ip not in total_ips['ips']:
-                if destination_ip not in destination_ips_list:
-                    destination_ips_list.append(destination_ip)
+                if destination_ip not in total_ips['ips']:
+                    if destination_ip not in destination_ips_list:
+                        destination_ips_list.append(destination_ip)
 
-                destination_ip_info = {destination_ip: {'ip': destination_ip,
-                                                        'name': '',
-                                                        'source_count': 0,
-                                                        'destination_count': 1,
-                                                        'total_count': 0,
-                                                        'virus_total': '',
-                                                        'country': '',
-                                                        'region': ''
-                                                        }
-                                       }
-                total_ips['ips'].update(destination_ip_info)
+                    destination_ip_info = {destination_ip: {'ip': destination_ip,
+                                                            'name': '',
+                                                            'source_count': 0,
+                                                            'destination_count': 1,
+                                                            'total_count': 0,
+                                                            'virus_total': '',
+                                                            'country': '',
+                                                            'region': ''
+                                                            }
+                                           }
+                    total_ips['ips'].update(destination_ip_info)
+
+            except:
+                pass
             bar()
 
     time_bar = len(total_ips['ips'])
