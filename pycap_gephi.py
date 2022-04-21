@@ -12,16 +12,20 @@ def cap_to_gephi(filename,export_name):
     time_bar = len(pcaps)
     with alive_bar(time_bar) as bar:
         for x in pcaps:
-            source_ip = x['_source']['layers']['ip']['ip.src']
-            destination_ip = x['_source']['layers']['ip']['ip.dst']
-            protocal = x['_source']['layers']['frame']['frame.protocols'].split('ip:')[1]
-            line = {'Source': [source_ip],
-                    'Target': [destination_ip],
-                    'Type': ['Directed'],
-                    'Connection': [protocal]}
-            packet_info = pd.DataFrame(line)
-            pcap_connections.append(packet_info)
-            bar()
+            try:
+                source_ip = x['_source']['layers']['ip']['ip.src']
+                destination_ip = x['_source']['layers']['ip']['ip.dst']
+                protocal = x['_source']['layers']['frame']['frame.protocols'].split('ip:')[1]
+                line = {'Source': [source_ip],
+                        'Target': [destination_ip],
+                        'Type': ['Directed'],
+                        'Connection': [protocal]}
+                packet_info = pd.DataFrame(line)
+                pcap_connections.append(packet_info)
+                bar()
+
+            except:
+                pass
 
     frame = pd.concat(pcap_connections, axis=0, ignore_index=True)
 
