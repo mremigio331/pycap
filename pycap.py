@@ -41,6 +41,35 @@ def pycap_stats(pcap, output_file):
               ', and a destination count of ' + str(dest_count))
         top_number += 1
 
+    try:
+        with open(output_file,'w') as f:
+            f.write('Total Packets: ' + str(total_packets))
+            f.write('Total Unique IPs: ' + str(total_ips))
+            f.write('Total Source IPs: ' + str(total_source))
+            f.write('Total Destination IPs: ' + str(total_destinations))
+            f.write('Total Potential Names: ' + str(potential_names) + '\n')
+            f.write('Top IP Statistics\n')
+            top_number = 1
+            f.write('Top IPs in the PCAPs')
+            for x in stats['statistics']['top_ips']['top_ips'][0]:
+                ip = x[1]['ip']
+                total_count = x[1]['total_count']
+                source_count = x[1]['source_count']
+                dest_count = x[1]['destination_count']
+                names = x[1]['name']
+                f.write(str(top_number) + '. ' +
+                        ip +
+                        ' (potential names: {' + str(names) +
+                        '}) had a total count of ' + str(total_count) +
+                        ', total source count of ' + str(source_count) +
+                        ', and a destination count of ' + str(dest_count))
+                top_number += 1
+
+            f.close()
+
+    except Exception as e:
+        print('ERROR: ' + str(e))
+
 if '-O' in sys.argv:
     output_file = sys.argv[sys.argv.index('-O') + 1]
 else:
