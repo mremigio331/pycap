@@ -86,7 +86,7 @@ if ('-s' in sys.argv) or ('-statistics' in sys.argv):
     """
     """
     #if output_file != '':
-    pycap_stats(pcap,'')
+    pycap_stats(pcap,output_file)
 
 
 if ('-g' in sys.argv) or ('-gephi' in sys.argv):
