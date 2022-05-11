@@ -109,9 +109,8 @@ def file_discovery_print_output(packets):
 
 
 def file_discovery_json_output(packets,filename):
-
-    ip_count = len(top_total)
-    file_count = len(top_files)
+    ip_count = len(packets['ips'])
+    file_count = len(packets['files'])
 
     print('Total IP Count: ' + str(ip_count) + '\n')
     print('Total File Count: ' + str(file_count) + '\n\n')
