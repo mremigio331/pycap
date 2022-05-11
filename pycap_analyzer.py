@@ -240,7 +240,7 @@ def file_discovery(file):
 
 
 def file_name_discovery(pcap):
-    packets = con.pcap_to_json(pcap)
+    packets = cap_con.pcap_to_json(pcap)
 
     total_ips = {'ips': {},
                  'files': {},
