@@ -2,7 +2,7 @@ import sys
 
 import pycap_gephi as gephi
 import pycap_analyzer as analyzer
-import pcap_outputs as outputs
+import pycap_outputs as outputs
 
 
 def file_name_discovery(pcap,output_file):
