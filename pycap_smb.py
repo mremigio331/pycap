@@ -12,7 +12,7 @@ def file_name_discovery(pcap,output_file):
     if '.txt' in output_file:
         outputs.file_discovery_txt_output(file_names, output_file)
 
-    if '.json' in output_file:
+    elif '.json' in output_file:
         outputs.file_discovery_json_output(file_names, output_file)
 
     else:

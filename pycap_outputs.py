@@ -2,14 +2,25 @@ import sys
 import json
 
 def file_discovery_txt_output(packets,filename):
+
+    print('Exporting data to ' + filename)
     total_ips = packets
     just_ips = total_ips['ips']
     top_total = sorted(just_ips.items(), key=lambda x: x[1]['total_count'], reverse=True)
     just_files = total_ips['files']
     top_files = sorted(just_files.items(), key=lambda x: x[1]['total_count'], reverse=True)
 
+    ip_count = len(top_total)
+    file_count = len(top_files)
+
+    print('Total IP Count: ' + str(ip_count) + '\n')
+    print('Total File Count: ' + str(file_count) + '\n\n')
+
+
     with open(filename, 'w') as f:
         f.write('SMB2 Traffic \n\n')
+        f.write('Total IP Count: ' + str(ip_count) + '\n')
+        f.write('Total File Count: ' + str(file_count) + '\n\n')
         f.write('Unique IPs\n\n')
         for x in top_total:
             ip = x[0]
@@ -39,6 +50,8 @@ def file_discovery_txt_output(packets,filename):
 
         f.close()
 
+    print('Export Complete')
+
 def file_discovery_print_output(packets):
     total_ips = packets
     just_ips = total_ips['ips']
@@ -46,8 +59,12 @@ def file_discovery_print_output(packets):
     just_files = total_ips['files']
     top_files = sorted(just_files.items(), key=lambda x: x[1]['total_count'], reverse=True)
 
+    ip_count = len(top_total)
+    file_count = len(top_files)
 
     print('SMB2 Traffic\n')
+    print('Total IP Count: ' + str(ip_count))
+    print('Total File Count: ' + str(file_count) + '\n')
     print('Unique IPs\n')
     ip_count = len(top_total)
 
@@ -91,6 +108,15 @@ def file_discovery_print_output(packets):
         print('\n')
 
 
-def file_discovery_json_output(packets,output_file):
-    with open(output_file, 'w', encoding='utf-8') as f:
+def file_discovery_json_output(packets,filename):
+
+    ip_count = len(top_total)
+    file_count = len(top_files)
+
+    print('Total IP Count: ' + str(ip_count) + '\n')
+    print('Total File Count: ' + str(file_count) + '\n\n')
+    print('Exporting data to ' + filename)
+    with open(filename, 'w', encoding='utf-8') as f:
         json.dump(packets, f, ensure_ascii=False, indent=4)
+
+    print('Export Complete')
