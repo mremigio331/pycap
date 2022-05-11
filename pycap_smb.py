@@ -2,7 +2,6 @@ import sys
 
 import pycap_gephi as gephi
 import pycap_analyzer as analyzer
-import pycap_conversion as con
 import pcap_outputs as outputs
 
 
@@ -20,15 +19,16 @@ def file_name_discovery(pcap,output_file):
         outputs.file_discovery_print_output(file_names)
 
 
+if '-O' in sys.argv:
+    output_file = sys.argv[sys.argv.index('-O') + 1]
+else:
+    output_file = ''
 
-if ('-g' in sys.argv) or ('-gephi' in sys.argv):
-    """
-    """
-    file_name = pcap
-    export_name = output_file
-
-    geph.cap_to_gephi(file_name, export_name)
-
+if '-p' in sys.argv:
+    pcap = sys.argv[sys.argv.index('-p') + 1]
+else:
+    print('Use -p to add a .pcap file.')
+    sys.exit()
 
 
 if ('-h' in sys.argv) or ('-help' in sys.argv):
@@ -36,9 +36,7 @@ if ('-h' in sys.argv) or ('-help' in sys.argv):
     The -h or -help flag will print in the terminal all available flags
     """
     print('*** Commands ***')
-    print('-g  -gephi      analyzes pcap and exports file for gephi')
     print('-O  -outfile    declares the filename')
     print('-p  -pcap       identifies the pcap file')
-    print('-s  -stats      prints statistical data from the pcap')
 
 
