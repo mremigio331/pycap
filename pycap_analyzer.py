@@ -5,31 +5,6 @@ import json
 
 import pycap_conversion as cap_con
 
-
-def pcap_analyzer(pcap, export_file, all, name_lookup): #,virus_total,region)
-
-    config_handler.set_global(length=40, bar='classic', enrich_print=False)
-
-    pcaps = cap_con.pcap_to_json(pcap)
-
-    total_ips = analyzer_loop(pcaps,name_lookup)
-
-
-
-    if export_file == 'None':
-        if all == True:
-            print(total_ips['ips'])
-        else:
-            just_ips = total_ips['ips']
-            top = sorted(just_ips.items(), key=lambda x: x[1]['total_count'], reverse=True)
-            print(top[0:9])
-
-    else:
-        return total_ips
-        #with open(export_file, 'w') as outfile:
-        #    json.dump(total_ips, outfile)
-
-
 def analyzer_loop(pcaps,name_lookup):
     total_ips = {'ips': {}}
     source_ips_list = []
@@ -153,6 +128,246 @@ def analyzer_loop(pcaps,name_lookup):
     total_ips.update({'statistics': pcap_stats})
 
     return total_ips
+
+
+def file_discovery(file):
+    pcaps = con.pcap_to_json(file)
+
+    total_ips = {'ips': {},
+                 'files': {},
+                 'stats': {'file_interaction_count': 0}
+                 }
+    source_ips_list = []
+    destination_ips_list = []
+
+    for x in pcaps:
+        try:
+            filename = x['_source']['layers']['smb2']['Create Request (0x05)']['smb2.filename']
+            count = total_ips['stats']['file_interaction_count']
+            count = count + 1
+            total_ips['stats'].update({'file_interaction_count': count})
+
+            source_ip = x['_source']['layers']['ip']['ip.src']
+            destination_ip = x['_source']['layers']['ip']['ip.addr']
+
+            if source_ip not in total_ips['ips']:
+                source_ips_list.append(source_ip)
+
+                info = {source_ip: {'ip': source_ip,
+                                    'source_count': 1,
+                                    'destination_count': 0,
+                                    'total_count': 0,
+                                    'files': [filename]}}
+
+                total_ips['ips'].update(info)
+
+            if source_ip in total_ips['ips']:
+                count = total_ips['ips'][source_ip]['source_count']
+                count = count + 1
+                total_ips['ips'][source_ip].update({'source_count': count})
+
+                files = total_ips['ips'][source_ip]['files']
+
+                if filename not in files:
+                    files.append(filename)
+                    total_ips['ips'][source_ip].update({'files': files})
+
+            if destination_ip not in total_ips['ips']:
+                destination_ips_list.append(destination_ip)
+
+                info = {destination_ip: {'ip': destination_ip,
+                                         'source_count': 0,
+                                         'destination_count': 1,
+                                         'total_count': 0,
+                                         'files': [filename]}}
+
+                total_ips['ips'].update(info)
+
+            if destination_ip in total_ips['ips']:
+                count = total_ips['ips'][destination_ip]['destination_count']
+                count = count + 1
+                total_ips['ips'][destination_ip].update({'destination_count': count})
+
+                if filename not in files:
+                    files.append(filename)
+                    total_ips['ips'][source_ip].update({'files': files})
+
+            if filename not in total_ips['files']:
+                connection = source_ip + ' ' + destination_ip
+                info = {filename: {'total_count': 1,
+                                   'total_connections': 1,
+                                   'connections': {connection: {'source_ip': source_ip,
+                                                                'destination_ip': destination_ip,
+                                                                'count': 1}
+                                                   }}}
+                total_ips['files'].update(info)
+
+            if filename in total_ips['files']:
+                for x in total_ips['files']:
+                    if filename == x:
+                        connection = source_ip + ' ' + destination_ip
+                        count = total_ips['files'][filename]['total_count']
+                        count = count + 1
+                        total_ips['files'][filename].update({'total_count': count})
+
+                        if connection in total_ips['files'][filename]['connections']:
+                            count = total_ips['files'][filename]['connections'][connection]['count']
+                            count = count + 1
+                            total_ips['files'][filename]['connections'][connection].update({'count': count})
+
+                        if connection not in total_ips['files'][filename]['connections']:
+                            # print(connection)
+                            count = total_ips['files'][filename]['total_connections']
+                            count = count + 1
+                            total_ips['files'][filename].update({'total_connections': count})
+                            info = {connection: {'source_ip': source_ip,
+                                                 'destination_ip': destination_ip,
+                                                 'count': 1}
+                                    }
+                            total_ips['files'][filename]['connections'].update({info})
+
+        except Exception as e:
+            pass
+
+    for x in total_ips['ips']:
+        scount = total_ips['ips'][x]['source_count']
+        dcount = total_ips['ips'][x]['destination_count']
+        total = scount + dcount
+        total_ips['ips'][x].update({'total_count': total})
+
+    return total_ips
+
+
+
+def file_name_discovery(pcap):
+    packets = con.pcap_to_json(pcap)
+
+    total_ips = {'ips': {},
+                 'files': {},
+                 'stats': {'file_interaction_count': 0}
+                 }
+    source_ips_list = []
+    destination_ips_list = []
+
+    for x in packets:
+        try:
+            filename = x['_source']['layers']['smb2']['Create Request (0x05)']['smb2.filename']
+            count = total_ips['stats']['file_interaction_count']
+            count = count + 1
+            total_ips['stats'].update({'file_interaction_count': count})
+
+            source_ip = x['_source']['layers']['ip']['ip.src']
+            destination_ip = x['_source']['layers']['ip']['ip.addr']
+
+            if source_ip not in total_ips['ips']:
+                source_ips_list.append(source_ip)
+
+                info = {source_ip: {'ip': source_ip,
+                                    'source_count': 1,
+                                    'destination_count': 0,
+                                    'total_count': 0,
+                                    'files': [filename]}}
+
+                total_ips['ips'].update(info)
+
+            if source_ip in total_ips['ips']:
+                count = total_ips['ips'][source_ip]['source_count']
+                count = count + 1
+                total_ips['ips'][source_ip].update({'source_count': count})
+
+                files = total_ips['ips'][source_ip]['files']
+
+                if filename not in files:
+                    files.append(filename)
+                    total_ips['ips'][source_ip].update({'files': files})
+
+            if destination_ip not in total_ips['ips']:
+                destination_ips_list.append(destination_ip)
+
+                info = {destination_ip: {'ip': destination_ip,
+                                         'source_count': 0,
+                                         'destination_count': 1,
+                                         'total_count': 0,
+                                         'files': [filename]}}
+
+                total_ips['ips'].update(info)
+
+            if destination_ip in total_ips['ips']:
+                count = total_ips['ips'][destination_ip]['destination_count']
+                count = count + 1
+                total_ips['ips'][destination_ip].update({'destination_count': count})
+
+                if filename not in files:
+                    files.append(filename)
+                    total_ips['ips'][source_ip].update({'files': files})
+
+            if filename not in total_ips['files']:
+                connection = source_ip + ' ' + destination_ip
+                info = {filename: {'total_count': 1,
+                                   'total_connections': 1,
+                                   'connections': {connection: {'source_ip': source_ip,
+                                                                'destination_ip': destination_ip,
+                                                                'count': 1}
+                                                   }}}
+                total_ips['files'].update(info)
+
+            if filename in total_ips['files']:
+                for x in total_ips['files']:
+                    if filename == x:
+                        connection = source_ip + ' ' + destination_ip
+                        count = total_ips['files'][filename]['total_count']
+                        count = count + 1
+                        total_ips['files'][filename].update({'total_count': count})
+
+                        if connection in total_ips['files'][filename]['connections']:
+                            count = total_ips['files'][filename]['connections'][connection]['count']
+                            count = count + 1
+                            total_ips['files'][filename]['connections'][connection].update({'count': count})
+
+                        if connection not in total_ips['files'][filename]['connections']:
+                            count = total_ips['files'][filename]['total_connections']
+                            count = count + 1
+                            total_ips['files'][filename].update({'total_connections': count})
+                            info = {connection: {'source_ip': source_ip,
+                                                 'destination_ip': destination_ip,
+                                                 'count': 1}
+                                    }
+                            total_ips['files'][filename]['connections'].update({info})
+
+        except:
+            pass
+
+    for x in total_ips['ips']:
+        scount = total_ips['ips'][x]['source_count']
+        dcount = total_ips['ips'][x]['destination_count']
+        total = scount + dcount
+        total_ips['ips'][x].update({'total_count': total})
+
+    return total_ips
+
+
+def pcap_analyzer(pcap, export_file, all, name_lookup): #,virus_total,region)
+
+    config_handler.set_global(length=40, bar='classic', enrich_print=False)
+
+    pcaps = cap_con.pcap_to_json(pcap)
+
+    total_ips = analyzer_loop(pcaps,name_lookup)
+
+
+
+    if export_file == 'None':
+        if all == True:
+            print(total_ips['ips'])
+        else:
+            just_ips = total_ips['ips']
+            top = sorted(just_ips.items(), key=lambda x: x[1]['total_count'], reverse=True)
+            print(top[0:9])
+
+    else:
+        return total_ips
+        #with open(export_file, 'w') as outfile:
+        #    json.dump(total_ips, outfile)
 
 
 

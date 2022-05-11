@@ -43,14 +43,14 @@ def pycap_stats(pcap, output_file):
 
     try:
         with open(output_file,'w') as f:
-            f.write('Total Packets: ' + str(total_packets))
-            f.write('Total Unique IPs: ' + str(total_ips))
-            f.write('Total Source IPs: ' + str(total_source))
-            f.write('Total Destination IPs: ' + str(total_destinations))
+            f.write('Total Packets: ' + str(total_packets) + '\n')
+            f.write('Total Unique IPs: ' + str(total_ips) + '\n')
+            f.write('Total Source IPs: ' + str(total_source) + '\n')
+            f.write('Total Destination IPs: ' + str(total_destinations) + '\n')
             f.write('Total Potential Names: ' + str(potential_names) + '\n')
             f.write('Top IP Statistics\n')
             top_number = 1
-            f.write('Top IPs in the PCAPs')
+            f.write('Top IPs in the PCAPs\n')
             for x in stats['statistics']['top_ips']['top_ips'][0]:
                 ip = x[1]['ip']
                 total_count = x[1]['total_count']
