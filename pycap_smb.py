@@ -38,5 +38,7 @@ if ('-h' in sys.argv) or ('-help' in sys.argv):
     print('*** Commands ***')
     print('-O  -outfile    declares the filename')
     print('-p  -pcap       identifies the pcap file')
+    
+file_name_discovery(pcap,output_file)
 
 
