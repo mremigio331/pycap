@@ -3,8 +3,7 @@ import sys
 import os
 import pydeck as pdk
 import pandas as pd
-from streamlit_agraph import agraph, TripleStore, Node, Edge, Config
-from layout import footer
+
 import traceback
 
 import json
@@ -18,7 +17,7 @@ import pycap_analyzer as analyzer
 def home():
 
     header = st.container()
-    dataset = st.container()
+    #dataset = st.container()
 
     public_df = pd.DataFrame(columns=['IP', 'Lat', 'Lon'])
 
@@ -93,11 +92,14 @@ def pcap_show(pcap):
     with open(os.path.join(pcap.name), "wb") as f:
         f.write(pcap.getbuffer())
 
-    st.info('Converting pcap')
+    convert = st.info('Converting pcap')
+    convert
     packet = analyzer.stats(pcap.name)
     os.remove(pcap.name)
     ip_cleanup(packet)
     return packet
+    convert = None
+    convert
 
 def ip_cleanup(packets):
     st.header('PCAP Statistics')

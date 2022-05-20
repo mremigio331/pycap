@@ -2,7 +2,11 @@
 import pandas as pd
 from alive_progress import alive_bar, config_handler
 
-import pycap_conversion as cap_con
+try:
+    from py_Files import pycap_conversion as cap_con
+
+except:
+    import pycap_conversion as cap_con
 
 def cap_to_gephi(filename,export_name):
 

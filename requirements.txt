@@ -1,3 +1,2 @@
 alive-progress
 streamlit
-graphviz

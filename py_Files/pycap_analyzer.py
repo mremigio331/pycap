@@ -4,8 +4,10 @@ from alive_progress import alive_bar, config_handler
 import pandas as pd
 import geoip2.database
 import json
-
-import pycap_conversion as cap_con
+try:
+    from py_Files import pycap_analyzer as lyzer, pycap_gephi as geph, pycap_conversion as cap_con
+except:
+    import pycap_analyzer as lyzer, pycap_gephi as geph, pycap_conversion as cap_con
 
 def analyzer_loop(pcaps,name_lookup):
     total_ips = {'ips': {}}
