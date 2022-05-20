@@ -3,9 +3,7 @@
 """
 import sys
 
-import pycap_gephi as geph
-import pycap_analyzer as lyzer
-
+from py_Files import pycap_analyzer as lyzer, pycap_gephi as geph
 
 
 def pycap_stats(pcap, output_file):
@@ -62,7 +60,7 @@ def pycap_stats(pcap, output_file):
                         ' (potential names: {' + str(names) +
                         '}) had a total count of ' + str(total_count) +
                         ', total source count of ' + str(source_count) +
-                        ', and a destination count of ' + str(dest_count))
+                        ', and a destination count of ' + str(dest_count) + '\n')
                 top_number += 1
 
             f.close()
