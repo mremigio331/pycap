@@ -149,13 +149,4 @@ def ip_cleanup(packets):
                     st.write('Destination Count: ' + str(destination_count))
                     st.write('Location: ' + str(region) + ', ' + str(country))
 
-def link_chart():
-    list(store.getNodes())
-    list(store.getEdges())
 
-    config = Config(height=500,
-                    width=700,
-                    nodeHighlightBehavior=True,
-                    highlightColor="#F7A7A6",
-                    directed=True,
-                    collapsible=True)
