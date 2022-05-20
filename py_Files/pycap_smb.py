@@ -1,6 +1,5 @@
 import sys
 
-import pycap_gephi as gephi
 import pycap_analyzer as analyzer
 import pycap_outputs as outputs
 

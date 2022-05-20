@@ -1,7 +1,5 @@
 import streamlit as st
-import sys
-sys.path.append('GUIs/')
-import home_page as home
+from GUIs import home_page as home
 
 
 st.set_page_config(page_title='PyCap', layout='wide', initial_sidebar_state='auto')

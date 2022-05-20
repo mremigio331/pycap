@@ -1,4 +1,3 @@
-import sys
 import json
 
 def file_discovery_txt_output(packets,filename):

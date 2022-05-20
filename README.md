@@ -2,9 +2,18 @@
 
 PCAP analyzer tool.
 
+## Main Page
+![Output](Images/main_page.png)
+![Output](Images/main_page_2.png)
+
+## Gephi Output Example
+![Output](Images/Gephi.png)
 To install all dependencies needed:
 
 $ pip install -r requirements.txt
+
+# To run GUI import the following code:
+$ streamlit run pycap_gui.py
 
 # To run the code input the following:
 

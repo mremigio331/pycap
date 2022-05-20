@@ -1,6 +1,3 @@
-"""
-
-"""
 import sys
 
 from py_Files import pycap_analyzer as lyzer, pycap_gephi as geph

@@ -1,4 +1,3 @@
-
 import pandas as pd
 from alive_progress import alive_bar, config_handler
 

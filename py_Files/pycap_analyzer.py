@@ -1,9 +1,8 @@
 import sys
 sys.setrecursionlimit(50000)
 from alive_progress import alive_bar, config_handler
-import pandas as pd
 import geoip2.database
-import json
+
 try:
     from py_Files import pycap_analyzer as lyzer, pycap_gephi as geph, pycap_conversion as cap_con
 except:
