@@ -1,6 +1,8 @@
 import sys
 sys.setrecursionlimit(50000)
 from alive_progress import alive_bar, config_handler
+import pandas as pd
+import geoip2.database
 import json
 
 import pycap_conversion as cap_con
@@ -127,6 +129,8 @@ def analyzer_loop(pcaps,name_lookup):
 
     total_ips.update({'statistics': pcap_stats})
 
+    total_ips = ip_location_lookup(total_ips)
+
     return total_ips
 
 
@@ -216,7 +220,6 @@ def file_discovery(file):
                             total_ips['files'][filename]['connections'][connection].update({'count': count})
 
                         if connection not in total_ips['files'][filename]['connections']:
-                            # print(connection)
                             count = total_ips['files'][filename]['total_connections']
                             count = count + 1
                             total_ips['files'][filename].update({'total_connections': count})
@@ -343,6 +346,7 @@ def file_name_discovery(pcap):
         total = scount + dcount
         total_ips['ips'][x].update({'total_count': total})
 
+    total_ips = ip_location_lookup(total_ips)
     return total_ips
 
 
@@ -409,5 +413,40 @@ def stats(pcap):
     total_ips['statistics']['top_ips'].update({'top_ips': [top_10_total]})
     total_ips['statistics']['top_ips'].update({'top_source': [top_10_source]})
     total_ips['statistics']['top_ips'].update({'top_dest': [top_10_dest]})
+
+    return total_ips
+
+
+def ip_location_lookup(total_ips):
+
+    for x in total_ips['ips']:
+        ip = x
+        if ip[0:3] == '10.':
+            city = 'Private IP'
+            country = 'Private IP'
+        elif ip[0:4] == '172.':
+            city = 'Private IP'
+            country = 'Private IP'
+        elif ip[0:4] == '192.':
+            city = 'Private IP'
+            country = 'Private IP'
+
+        else:
+            try:
+                with geoip2.database.Reader('Data/IP_Lookup_City.mmdb') as reader:
+                    response = reader.city(ip)
+                    city = response.city.name
+                    country = response.country.iso_code
+                    lat = response.location.latitude
+                    lon = response.location.longitude
+                    total_ips['ips'][x].update({'lat': lat})
+                    total_ips['ips'][x].update({'lon': lon})
+
+            except:
+                pass
+
+        total_ips['ips'][x].update({'country': country})
+        total_ips['ips'][x].update({'region': city})
+
 
     return total_ips
