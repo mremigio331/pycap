@@ -3,9 +3,7 @@
 """
 import sys
 
-import pycap_gephi as geph
-import pycap_analyzer as lyzer
-
+from py_Files import pycap_analyzer as lyzer, pycap_gephi as geph
 
 
 def pycap_stats(pcap, output_file):
