@@ -46,6 +46,16 @@ def analyzer_loop(pcaps,name_lookup):
                         except:
                             pass
 
+                    if destination_ip in total_ips['ips'][source_ip]['connections']:
+                        count = total_ips['ips'][source_ip]['connections'][destination_ip]['destination_count']
+                        new_count = count + 1
+                        total_ips['ips'][source_ip]['connections'][destination_ip].update(
+                            {'destination_count': new_count})
+
+                    if destination_ip not in total_ips['ips'][source_ip]['connections']:
+                        total_ips['ips'][source_ip]['connections'].update({destination_ip: {'source_count': 0,
+                                                                                            'destination_count': 1}})
+
                 if destination_ip in total_ips['ips']:
                     if destination_ip not in destination_ips_list:
                         destination_ips_list.append(destination_ip)
@@ -53,6 +63,16 @@ def analyzer_loop(pcaps,name_lookup):
                     destination_count = total_ips['ips'][destination_ip]['destination_count']
                     destination_count = destination_count + 1
                     total_ips['ips'][destination_ip].update({'destination_count': destination_count})
+
+                    if source_ip in total_ips['ips'][destination_ip]['connections']:
+                        count = total_ips['ips'][destination_ip]['connections'][source_ip]['source_count']
+                        new_count = count + 1
+                        total_ips['ips'][destination_ip]['connections'][source_ip].update({'source_count': new_count})
+
+                    if source_ip not in total_ips['ips'][destination_ip]['connections']:
+                        total_ips['ips'][destination_ip]['connections'][source_ip].update(
+                            {source_ip: {'source_count': 1,
+                                         'destination_count': 0}})
 
                 if source_ip not in total_ips['ips']:
 
@@ -66,9 +86,10 @@ def analyzer_loop(pcaps,name_lookup):
                                                   'total_count': 0,
                                                   'virus_total': '',
                                                   'country': '',
-                                                  'region': ''
-                                                  }
-                                      }
+                                                  'region': '',
+                                                  'connections': {destination_ip: {'source_count': 0,
+                                                                                   'destination_count': 1}
+                                                                  }}}
                     total_ips['ips'].update(source_ip_info)
 
                     if name_lookup is True:
@@ -98,13 +119,14 @@ def analyzer_loop(pcaps,name_lookup):
                                                             'total_count': 0,
                                                             'virus_total': '',
                                                             'country': '',
-                                                            'region': ''
-                                                            }
-                                           }
+                                                            'region': '',
+                                                            'connections': {source_ip: {'source_count': 1,
+                                                                                        'destination_count': 0}
+                                                                            }}}
                     total_ips['ips'].update(destination_ip_info)
 
             except:
-                pass
+                traceback.format_exc()
             bar()
 
     time_bar = len(total_ips['ips'])
