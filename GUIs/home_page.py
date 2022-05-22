@@ -102,16 +102,79 @@ def pcap_show(pcap):
     convert
 
 def ip_cleanup(packets):
-    st.header('PCAP Statistics')
-    st.subheader('Total Packets : ' + str(packets['statistics']['total_packets']))
-    st.subheader('Total IPs : ' + str(packets['statistics']['total_ips']))
-    st.subheader('Total Source IPs : ' + str(packets['statistics']['total_source_ips']))
-    st.subheader('Total Destination IPs : ' + str(packets['statistics']['total_destination_ips']))
-    st.subheader('Total Potential Names : ' + str(packets['statistics']['total_potential_names']))
+    st.title('PCAP Statistics')
+    st.header('Total Packets : ' + str(packets['statistics']['total_packets']))
+    st.header('Total IPs : ' + str(packets['statistics']['total_ips']))
+    st.header('Total Source IPs : ' + str(packets['statistics']['total_source_ips']))
+    st.header('Total Destination IPs : ' + str(packets['statistics']['total_destination_ips']))
+    st.header('Total Potential Names : ' + str(packets['statistics']['total_potential_names']))
 
-    st.header('Individual IP Statistics')
+    st.title('Individual IP Statistics')
+    left, right = st.columns(2)
+
+    side = 'left'
 
     for x in packets['ips']:
+
+        if side == 'left':
+            ip = x
+            names = packets['ips'][x]['name']
+            source_count = packets['ips'][x]['source_count']
+            destination_count = packets['ips'][x]['destination_count']
+            region = packets['ips'][x]['region']
+            country = packets['ips'][x]['country']
+
+            if region == 'Private IP':
+
+                try:
+                    name = str(names[0])
+                    name = name.split('.local')[0]
+                    left.markdown("<h2 style='text-align: center; '>" + name  + "</h2>", unsafe_allow_html=True)
+                    left.subheader('IP: ' + ip)
+                    left.subheader('Potential Names: ' + str(names))
+                    left.subheader('Source Count: ' + str(source_count))
+                    left.subheader('Destination Count: ' + str(destination_count))
+                    left.subheader('Location: Private IP Address')
+
+                except:
+                    left.markdown("<h2 style='text-align: center; '>" + ip + "</h2>", unsafe_allow_html=True)
+                    left.subheader('IP: ' + ip)
+                    left.subheader('Potential Names: ' + str(names))
+                    left.subheader('Source Count: ' + str(source_count))
+                    left.subheader('Destination Count: ' + str(destination_count))
+                    left.subheader('Location: Private IP Address')
+
+            else:
+
+                try:
+                    name = str(names[0])
+                    name = name.split('.local')[0]
+                    left.markdown("<h2 style='text-align: center; '>" + name + "</h2>", unsafe_allow_html=True)
+                    left.subheader('IP: ' + ip)
+                    left.subheader('Potential Names: ' + str(names))
+                    left.subheader('Source Count: ' + str(source_count))
+                    left.subheader('Destination Count: ' + str(destination_count))
+                    left.subheader('Location: ' + str(region) + ', ' + str(country))
+                except:
+                    left.markdown("<h2 style='text-align: center; '>" + ip + "</h2>", unsafe_allow_html=True)
+                    left.subheader('IP: ' + ip)
+                    left.subheader('Potential Names: ' + str(names))
+                    left.subheader('Source Count: ' + str(source_count))
+                    left.subheader('Destination Count: ' + str(destination_count))
+                    left.subheader('Location: ' + str(region) + ', ' + str(country))
+
+            expander = left.expander('Connections (' + str(len(packets['ips'][x]['connections'])) + ')')
+
+            for connection in packets['ips'][x]['connections']:
+                connection_ip = connection
+                connection_source = packets['ips'][x]['connections'][connection]['source_count']
+                connection_destination = packets['ips'][x]['connections'][connection]['destination_count']
+                expander.write(' * ' + connection_ip + ': {Source: ' + str(connection_source) + ', Destination: ' +
+                           str(connection_destination) + '}')
+
+            side = 'right'
+
+        elif side == 'right':
             ip = x
             names = packets['ips'][x]['name']
             source_count = packets['ips'][x]['source_count']
@@ -123,32 +186,46 @@ def ip_cleanup(packets):
                 try:
                     name = str(names[0])
                     name = name.split('.local')[0]
-                    st.subheader(ip + ' (' + name + ')')
-                    st.write('Potential Names: ' + str(names))
-                    st.write('Source Count: ' + str(source_count))
-                    st.write('Destination Count: ' + str(destination_count))
-                    st.write('Location: Private IP Address')
+                    right.markdown("<h2 style='text-align: center; '>" + name + "</h2>",
+                                  unsafe_allow_html=True)
+                    right.subheader('IP: ' + ip)
+                    right.subheader('Potential Names: ' + str(names))
+                    right.subheader('Source Count: ' + str(source_count))
+                    right.subheader('Destination Count: ' + str(destination_count))
+                    right.subheader('Location: Private IP Address')
                 except:
-                    st.subheader(ip)
-                    st.write('Potential Names: ' + str(names))
-                    st.write('Source Count: ' + str(source_count))
-                    st.write('Destination Count: ' + str(destination_count))
-                    st.write('Location: Private IP Address')
+                    right.markdown("<h2 style='text-align: center; '>" + ip + "</h2>", unsafe_allow_html=True)
+                    right.subheader('IP: ' + ip)
+                    right.subheader('Potential Names: ' + str(names))
+                    right.subheader('Source Count: ' + str(source_count))
+                    right.subheader('Destination Count: ' + str(destination_count))
+                    right.subheader('Location: Private IP Address')
 
             else:
                 try:
                     name = str(names[0])
                     name = name.split('.local')[0]
-                    st.subheader(ip + ' (' + name + ')')
-                    st.write('Potential Names: ' + str(names))
-                    st.write('Source Count: ' + str(source_count))
-                    st.write('Destination Count: ' + str(destination_count))
-                    st.write('Location: ' + str(region) + ', ' + str(country))
+                    right.markdown("<h2 style='text-align: center; '>" +name + "</h2>", unsafe_allow_html=True)
+                    right.subheader('IP: ' + ip)
+                    right.subheader('Potential Names: ' + str(names))
+                    right.subheader('Source Count: ' + str(source_count))
+                    right.subheader('Destination Count: ' + str(destination_count))
+                    right.subheader('Location: ' + str(region) + ', ' + str(country))
                 except:
-                    st.subheader(ip)
-                    st.write('Potential Names: ' + str(names))
-                    st.write('Source Count: ' + str(source_count))
-                    st.write('Destination Count: ' + str(destination_count))
-                    st.write('Location: ' + str(region) + ', ' + str(country))
+                    right.markdown("<h2 style='text-align: center; '>" + ip + "</h2>", unsafe_allow_html=True)
+                    right.subheader('IP: ' + ip)
+                    right.subheader('Potential Names: ' + str(names))
+                    right.subheader('Source Count: ' + str(source_count))
+                    right.subheader('Destination Count: ' + str(destination_count))
+                    right.subheader('Location: ' + str(region) + ', ' + str(country))
 
+            expander = right.expander('Connections (' + str(len(packets['ips'][x]['connections'])) + ')')
 
+            for connection in packets['ips'][x]['connections']:
+                connection_ip = connection
+                connection_source = packets['ips'][x]['connections'][connection]['source_count']
+                connection_destination = packets['ips'][x]['connections'][connection]['destination_count']
+                expander.write(' * ' + connection_ip + ': {Source: ' + str(connection_source) + ', Destination: ' +
+                               str(connection_destination) + '}')
+
+            side = 'left'

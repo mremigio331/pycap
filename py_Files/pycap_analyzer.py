@@ -126,7 +126,8 @@ def analyzer_loop(pcaps,name_lookup):
                     total_ips['ips'].update(destination_ip_info)
 
             except:
-                traceback.format_exc()
+                pass
+
             bar()
 
     time_bar = len(total_ips['ips'])
