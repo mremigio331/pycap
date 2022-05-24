@@ -3,6 +3,8 @@ import sys
 import os
 import pydeck as pdk
 import pandas as pd
+import plotly.graph_objects as go
+import networkx as nx
 
 import traceback
 
@@ -10,6 +12,8 @@ import json
 
 sys.path.append('py_Files')
 import pycap_analyzer as analyzer
+import pycap_conversion as cap_con
+import pycap_gephi as gephi
 
 
 
@@ -18,6 +22,11 @@ def home():
 
     header = st.container()
     #dataset = st.container()
+    global ip_map, link_map
+
+    ip_map, link_map = st.columns(2)
+
+    link_map.markdown("<h2 style='text-align: center; '> IP Links </h2>", unsafe_allow_html=True)
 
     public_df = pd.DataFrame(columns=['IP', 'Lat', 'Lon'])
 
@@ -49,12 +58,13 @@ def home():
                     new_row = {'IP': ip, 'Range': '192.0.0.0'}
                     private_df = private_df.append(new_row, ignore_index=True)
 
+
+
     with header:
         st.title('Home Page')
 
-
-        st.title('Public IP Map')
-        st.pydeck_chart(
+        ip_map.markdown("<h2 style='text-align: center; '> Public IP Map </h2>", unsafe_allow_html=True)
+        ip_map.pydeck_chart(
             pdk.Deck(
                 map_style='mapbox://styles/mapbox/dark-v10',
                 layers=[
@@ -80,34 +90,38 @@ def home():
                         get_line_color=[0, 0, 0]
                     ),
                 ],
-                tooltip={"html": "<b>Box: </b> {Box} <br /> "
-                                 "<b>Lon: </b> {Lon} <br /> "
+                tooltip={"html": "<b>Lon: </b> {Lon} <br /> "
                                  "<b>Lat: </b>{Lat} <br /> "
                                  "<b> City: </b>{City} <br /> "
                                  "<b> Country: </b>{Country}"}
             )
         )
 
+
 def pcap_show(pcap):
+
     with open(os.path.join(pcap.name), "wb") as f:
         f.write(pcap.getbuffer())
 
-    convert = st.info('Converting pcap')
-    convert
-    packet = analyzer.stats(pcap.name)
+    packets = cap_con.pcap_to_json(pcap.name)
+
+    packet = analyzer.stats(packets)
+    link_df = gephi.cap_to_link_df(packets)
+
+    link_chart(link_df)
+
     os.remove(pcap.name)
     ip_cleanup(packet)
     return packet
-    convert = None
-    convert
 
 def ip_cleanup(packets):
     st.title('PCAP Statistics')
-    st.header('Total Packets : ' + str(packets['statistics']['total_packets']))
-    st.header('Total IPs : ' + str(packets['statistics']['total_ips']))
-    st.header('Total Source IPs : ' + str(packets['statistics']['total_source_ips']))
-    st.header('Total Destination IPs : ' + str(packets['statistics']['total_destination_ips']))
-    st.header('Total Potential Names : ' + str(packets['statistics']['total_potential_names']))
+    lstats, rstats = st.columns(2)
+    lstats.header('Total Packets : ' + str(packets['statistics']['total_packets']))
+    lstats.header('Total IPs : ' + str(packets['statistics']['total_ips']))
+    lstats.header('Total Source IPs : ' + str(packets['statistics']['total_source_ips']))
+    rstats.header('Total Destination IPs : ' + str(packets['statistics']['total_destination_ips']))
+    rstats.header('Total Potential Names : ' + str(packets['statistics']['total_potential_names']))
 
     st.title('Individual IP Statistics')
     left, right = st.columns(2)
@@ -229,3 +243,85 @@ def ip_cleanup(packets):
                                str(connection_destination) + '}')
 
             side = 'left'
+
+
+def link_chart(link_df):
+    links = nx.from_pandas_edgelist(link_df,
+                                    source='Source',
+                                    target='Target',
+                                    edge_attr=True,
+                                    create_using=nx.DiGraph()
+                                    )
+
+    nodes = []
+    for x in links.nodes():
+        nodes.append(x)
+
+    links_3D = nx.spring_layout(links, dim=20, seed=40)
+    #links_3D = nx.spring_layout(links, k=0.15, iterations=20)
+
+
+    x_nodes = []
+    y_nodes = []
+    z_nodes = []
+    for x in links_3D:
+        x_nodes.append(links_3D[x][0])
+        y_nodes.append(links_3D[x][1])
+        z_nodes.append(links_3D[x][2])
+
+    edge_list = links.edges()
+
+    x_edges = []
+    y_edges = []
+    z_edges = []
+
+    for edge in edge_list:
+
+        x_coords = [links_3D[edge[0]][0], links_3D[edge[1]][0], None]
+        x_edges += x_coords
+
+        y_coords = [links_3D[edge[0]][1], links_3D[edge[1]][1], None]
+        y_edges += y_coords
+
+        z_coords = [links_3D[edge[0]][2], links_3D[edge[1]][2], None]
+        z_edges += z_coords
+
+    trace_edges = go.Scatter3d(x=x_edges,
+                               y=y_edges,
+                               z=z_edges,
+                               mode='lines',
+                               line=dict(color='black', width=4),
+                               hoverinfo='none')
+
+    trace_nodes = go.Scatter3d(x=x_nodes,
+                               y=y_nodes,
+                               z=z_nodes,
+                               mode='markers',
+                               marker=dict(symbol='circle',
+                                           size=10,
+                                           colorscale=['lightgreen', 'magenta'],  # either green or mageneta
+                                           line=dict(color='black', width=1)),
+                               text=nodes,
+                               hoverinfo='text')
+
+    axis = dict(showbackground=False,
+                showline=False,
+                zeroline=False,
+                showgrid=False,
+                showticklabels=False)
+
+    layout = go.Layout(
+                       showlegend=False,
+                       scene=dict(xaxis=dict(axis),
+                                  yaxis=dict(axis),
+                                  zaxis=dict(axis),
+                                  ),
+                       margin=dict(t=100),
+                       hovermode='closest'
+    )
+
+    data = [trace_edges, trace_nodes]
+    fig = go.Figure(data=data, layout=layout)
+
+
+    link_map.plotly_chart(fig, use_container_width = True)

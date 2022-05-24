@@ -400,9 +400,9 @@ def pcap_analyzer(pcap, export_file, all, name_lookup): #,virus_total,region)
 
 
 def stats(pcap):
-    pcaps = cap_con.pcap_to_json(pcap)
+    #pcaps = cap_con.pcap_to_json(pcap)
 
-    total_ips = analyzer_loop(pcaps, True)
+    total_ips = analyzer_loop(pcap, True)
 
     just_ips = total_ips['ips']
 
