@@ -5,7 +5,7 @@ import pydeck as pdk
 import pandas as pd
 import plotly.graph_objects as go
 import networkx as nx
-
+from alive_progress import alive_bar, config_handler
 import traceback
 
 import json
@@ -61,7 +61,7 @@ def home():
 
 
     with header:
-        st.title('Home Page')
+        #st.title('Home Page')
 
         ip_map.markdown("<h2 style='text-align: center; '> Public IP Map </h2>", unsafe_allow_html=True)
         ip_map.pydeck_chart(
@@ -106,9 +106,7 @@ def pcap_show(pcap):
     packets = cap_con.pcap_to_json(pcap.name)
 
     packet = analyzer.stats(packets)
-    link_df = gephi.cap_to_link_df(packets)
-
-    link_chart(link_df)
+    link_chart(packet)
 
     os.remove(pcap.name)
     ip_cleanup(packet)
@@ -245,29 +243,69 @@ def ip_cleanup(packets):
             side = 'left'
 
 
-def link_chart(link_df):
+def link_chart(packet):
+    pcap_connections = []
+    private_ips = []
+    public_ips = []
+
+    time_bar = len(packet['ips'])
+    with alive_bar(time_bar) as bar:
+        for x in packet['ips']:
+            for con in packet['ips'][x]['connections']:
+                try:
+                    source_ip = con
+                    destination_ip = x
+                    current_ips = [source_ip, destination_ip]
+                    weight = packet['ips'][x]['connections'][con]['destination_count']
+
+                    if weight > 0:
+                        line = {'Source': [source_ip],
+                                'Target': [destination_ip],
+                                'Type': ['Directed'],
+                                'Weight': [weight]}
+                        packet_info = pd.DataFrame(line)
+                        pcap_connections.append(packet_info)
+
+                    else:
+                        pass
+
+                    for ip in current_ips:
+                        if packet['ips'][ip]['country'] == 'Private IP':
+                            if ip not in private_ips:
+                                private_ips.append(ip)
+                        else:
+                            if ip not in public_ips:
+                                public_ips.append(ip)
+
+                except:
+                    pass
+
+            bar()
+
+    link_df = pd.concat(pcap_connections, axis = 0, ignore_index = True)
+
     links = nx.from_pandas_edgelist(link_df,
-                                    source='Source',
-                                    target='Target',
-                                    edge_attr=True,
-                                    create_using=nx.DiGraph()
-                                    )
+                                    source = 'Source',
+                                    target = 'Target',
+                                    edge_attr = 'Weight')
 
-    nodes = []
-    for x in links.nodes():
-        nodes.append(x)
+    links_3D = nx.spring_layout(links, dim = 20, seed = 40)
 
-    links_3D = nx.spring_layout(links, dim=20, seed=40)
-    #links_3D = nx.spring_layout(links, k=0.15, iterations=20)
+    x_private = []
+    y_private = []
+    z_private = []
+    for x in private_ips:
+        x_private.append(links_3D[x][0])
+        y_private.append(links_3D[x][1])
+        z_private.append(links_3D[x][2])
 
-
-    x_nodes = []
-    y_nodes = []
-    z_nodes = []
-    for x in links_3D:
-        x_nodes.append(links_3D[x][0])
-        y_nodes.append(links_3D[x][1])
-        z_nodes.append(links_3D[x][2])
+    x_public = []
+    y_public = []
+    z_public = []
+    for x in public_ips:
+        x_public.append(links_3D[x][0])
+        y_public.append(links_3D[x][1])
+        z_public.append(links_3D[x][2])
 
     edge_list = links.edges()
 
@@ -276,7 +314,6 @@ def link_chart(link_df):
     z_edges = []
 
     for edge in edge_list:
-
         x_coords = [links_3D[edge[0]][0], links_3D[edge[1]][0], None]
         x_edges += x_coords
 
@@ -286,53 +323,78 @@ def link_chart(link_df):
         z_coords = [links_3D[edge[0]][2], links_3D[edge[1]][2], None]
         z_edges += z_coords
 
-    trace_edges = go.Scatter3d(x=x_edges,
-                               y=y_edges,
-                               z=z_edges,
-                               mode='lines',
-                               line=dict(color='black', width=4),
-                               hoverinfo='none')
+    trace_edges = go.Scatter3d(name = 'Edges',
+                               x = x_edges,
+                               y = y_edges,
+                               z = z_edges,
+                               mode = 'lines',
+                               line = dict(color = 'blanchedalmond', width = 7),
+                               hoverinfo = 'none')
 
-    trace_nodes = go.Scatter3d(x=x_nodes,
-                               y=y_nodes,
-                               z=z_nodes,
-                               mode='markers',
-                               marker=dict(symbol='circle',
-                                           size=10,
-                                           colorscale=['lightgreen', 'magenta'],  # either green or mageneta
-                                           line=dict(color='black', width=1)),
-                               text=nodes,
-                               hoverinfo='text')
+    public_nodes = go.Scatter3d(name = 'Public IPs',
+                                x = x_public,
+                                y = y_public,
+                                z = z_public,
+                                mode = 'markers',
+                                marker = dict(symbol = 'circle',
+                                              size = 10,
+                                              color = 'blue'),
+                                text = public_ips,
+                                hoverinfo = 'text')
 
-    degrees = []
+    private_nodes = go.Scatter3d(name = 'Private IPs',
+                                 x = x_private,
+                                 y = y_private,
+                                 z = z_private,
+                                 mode = 'markers',
+                                 marker = dict(symbol = 'circle',
+                                               color = 'orange',
+                                               size = 10,
+                                               colorscale = 'dense',),
+                                 text = private_ips,
+                                 hoverinfo = 'text')
+
+    public_degrees = []
     for x in nx.degree(links):
-        new_degree = x[1] * 5
-        if new_degree < 10:
-            new_degree = 5
-        if new_degree > 100:
-            new_degree = 100
-        degrees.append(new_degree)
+        if x[0] in public_ips:
+            new_degree = x[1] * 5
+            if new_degree < 10:
+                new_degree = 5
+            if new_degree > 100:
+                new_degree = 100
 
-    trace_nodes.marker.size = degrees
+            public_degrees.append(new_degree)
 
-    axis = dict(showbackground=False,
-                showline=False,
-                zeroline=False,
-                showgrid=False,
-                showticklabels=False)
+    private_degrees = []
+    for x in nx.degree(links):
+        if x[0] in private_ips:
+            new_degree = x[1] * 5
+            if new_degree < 10:
+                new_degree = 5
+            if new_degree > 100:
+                new_degree = 100
+            private_degrees.append(new_degree)
+
+    private_nodes.marker.size = private_degrees
+    public_nodes.marker.size = public_degrees
+
+    axis = dict(showbackground = False,
+                showline = False,
+                zeroline = False,
+                showgrid = False,
+                showticklabels = False)
 
     layout = go.Layout(height = 600,
-                       showlegend=False,
-                       scene=dict(xaxis=dict(axis),
-                                  yaxis=dict(axis),
-                                  zaxis=dict(axis),
+                       showlegend = True,
+                       scene = dict(xaxis = dict(axis),
+                                  yaxis = dict(axis),
+                                  zaxis = dict(axis),
                                   ),
-                       margin=dict(t=100),
-                       hovermode='closest'
-    )
+                       margin = dict(t = 100),
+                       hovermode = 'closest'
+                       )
 
-    data = [trace_edges, trace_nodes]
-    fig = go.Figure(data=data, layout=layout)
-
+    data = [trace_edges, public_nodes, private_nodes]
+    fig = go.Figure(data = data, layout = layout)
 
     link_map.plotly_chart(fig, use_container_width = True)
