@@ -144,19 +144,19 @@ def ip_cleanup(packets):
                     name = str(names[0])
                     name = name.split('.local')[0]
                     left.markdown("<h2 style='text-align: center; '>" + name  + "</h2>", unsafe_allow_html=True)
-                    left.subheader('IP: ' + ip)
-                    left.subheader('Potential Names: ' + str(names))
-                    left.subheader('Source Count: ' + str(source_count))
-                    left.subheader('Destination Count: ' + str(destination_count))
-                    left.subheader('Location: Private IP Address')
+                    left.write('IP: ' + ip)
+                    left.write('Potential Names: ' + str(names))
+                    left.write('Source Count: ' + str(source_count))
+                    left.write('Destination Count: ' + str(destination_count))
+                    left.write('Location: Private IP Address')
 
                 except:
                     left.markdown("<h2 style='text-align: center; '>" + ip + "</h2>", unsafe_allow_html=True)
-                    left.subheader('IP: ' + ip)
-                    left.subheader('Potential Names: ' + str(names))
-                    left.subheader('Source Count: ' + str(source_count))
-                    left.subheader('Destination Count: ' + str(destination_count))
-                    left.subheader('Location: Private IP Address')
+                    left.write('IP: ' + ip)
+                    left.write('Potential Names: ' + str(names))
+                    left.write('Source Count: ' + str(source_count))
+                    left.write('Destination Count: ' + str(destination_count))
+                    left.write('Location: Private IP Address')
 
             else:
 
@@ -164,18 +164,18 @@ def ip_cleanup(packets):
                     name = str(names[0])
                     name = name.split('.local')[0]
                     left.markdown("<h2 style='text-align: center; '>" + name + "</h2>", unsafe_allow_html=True)
-                    left.subheader('IP: ' + ip)
-                    left.subheader('Potential Names: ' + str(names))
-                    left.subheader('Source Count: ' + str(source_count))
-                    left.subheader('Destination Count: ' + str(destination_count))
-                    left.subheader('Location: ' + str(region) + ', ' + str(country))
+                    left.write('IP: ' + ip)
+                    left.write('Potential Names: ' + str(names))
+                    left.write('Source Count: ' + str(source_count))
+                    left.write('Destination Count: ' + str(destination_count))
+                    left.write('Location: ' + str(region) + ', ' + str(country))
                 except:
                     left.markdown("<h2 style='text-align: center; '>" + ip + "</h2>", unsafe_allow_html=True)
-                    left.subheader('IP: ' + ip)
-                    left.subheader('Potential Names: ' + str(names))
-                    left.subheader('Source Count: ' + str(source_count))
-                    left.subheader('Destination Count: ' + str(destination_count))
-                    left.subheader('Location: ' + str(region) + ', ' + str(country))
+                    left.write('IP: ' + ip)
+                    left.write('Potential Names: ' + str(names))
+                    left.write('Source Count: ' + str(source_count))
+                    left.write('Destination Count: ' + str(destination_count))
+                    left.write('Location: ' + str(region) + ', ' + str(country))
 
             expander = left.expander('Connections (' + str(len(packets['ips'][x]['connections'])) + ')')
 
@@ -202,36 +202,36 @@ def ip_cleanup(packets):
                     name = name.split('.local')[0]
                     right.markdown("<h2 style='text-align: center; '>" + name + "</h2>",
                                   unsafe_allow_html=True)
-                    right.subheader('IP: ' + ip)
-                    right.subheader('Potential Names: ' + str(names))
-                    right.subheader('Source Count: ' + str(source_count))
-                    right.subheader('Destination Count: ' + str(destination_count))
-                    right.subheader('Location: Private IP Address')
+                    right.write('IP: ' + ip)
+                    right.write('Potential Names: ' + str(names))
+                    right.write('Source Count: ' + str(source_count))
+                    right.write('Destination Count: ' + str(destination_count))
+                    right.write('Location: Private IP Address')
                 except:
                     right.markdown("<h2 style='text-align: center; '>" + ip + "</h2>", unsafe_allow_html=True)
-                    right.subheader('IP: ' + ip)
-                    right.subheader('Potential Names: ' + str(names))
-                    right.subheader('Source Count: ' + str(source_count))
-                    right.subheader('Destination Count: ' + str(destination_count))
-                    right.subheader('Location: Private IP Address')
+                    right.write('IP: ' + ip)
+                    right.write('Potential Names: ' + str(names))
+                    right.write('Source Count: ' + str(source_count))
+                    right.write('Destination Count: ' + str(destination_count))
+                    right.write('Location: Private IP Address')
 
             else:
                 try:
                     name = str(names[0])
                     name = name.split('.local')[0]
                     right.markdown("<h2 style='text-align: center; '>" +name + "</h2>", unsafe_allow_html=True)
-                    right.subheader('IP: ' + ip)
-                    right.subheader('Potential Names: ' + str(names))
-                    right.subheader('Source Count: ' + str(source_count))
-                    right.subheader('Destination Count: ' + str(destination_count))
-                    right.subheader('Location: ' + str(region) + ', ' + str(country))
+                    right.write('IP: ' + ip)
+                    right.write('Potential Names: ' + str(names))
+                    right.write('Source Count: ' + str(source_count))
+                    right.write('Destination Count: ' + str(destination_count))
+                    right.write('Location: ' + str(region) + ', ' + str(country))
                 except:
                     right.markdown("<h2 style='text-align: center; '>" + ip + "</h2>", unsafe_allow_html=True)
-                    right.subheader('IP: ' + ip)
-                    right.subheader('Potential Names: ' + str(names))
-                    right.subheader('Source Count: ' + str(source_count))
-                    right.subheader('Destination Count: ' + str(destination_count))
-                    right.subheader('Location: ' + str(region) + ', ' + str(country))
+                    right.write('IP: ' + ip)
+                    right.write('Potential Names: ' + str(names))
+                    right.write('Source Count: ' + str(source_count))
+                    right.write('Destination Count: ' + str(destination_count))
+                    right.write('Location: ' + str(region) + ', ' + str(country))
 
             expander = right.expander('Connections (' + str(len(packets['ips'][x]['connections'])) + ')')
 
@@ -304,13 +304,24 @@ def link_chart(link_df):
                                text=nodes,
                                hoverinfo='text')
 
+    degrees = []
+    for x in nx.degree(links):
+        new_degree = x[1] * 5
+        if new_degree < 10:
+            new_degree = 5
+        if new_degree > 100:
+            new_degree = 100
+        degrees.append(new_degree)
+
+    trace_nodes.marker.size = degrees
+
     axis = dict(showbackground=False,
                 showline=False,
                 zeroline=False,
                 showgrid=False,
                 showticklabels=False)
 
-    layout = go.Layout(
+    layout = go.Layout(height = 600,
                        showlegend=False,
                        scene=dict(xaxis=dict(axis),
                                   yaxis=dict(axis),
