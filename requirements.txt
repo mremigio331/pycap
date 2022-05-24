@@ -1,4 +1,5 @@
 alive-progress
 geoip2
+plotly
 pyshark
 streamlit
