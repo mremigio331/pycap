@@ -3,8 +3,11 @@
 PCAP analyzer tool.
 
 ## Main Page
-![Output](Images/main_page.png)
-![Output](Images/main_page_2.png)
+![Output](Images/pycap_1.png)
+![Output](Images/pycap_2.png)
+
+## Interactive 3D Network Map
+![Output](Images/pycap_network.gif)
 
 ## Gephi Output Example
 ![Output](Images/Gephi.png)

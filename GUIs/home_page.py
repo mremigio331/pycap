@@ -34,6 +34,8 @@ def home():
 
     analyze = st.sidebar.button('Analyze pcap')
 
+    sample = st.sidebar.button('Sample Data')
+
     if analyze:
         total_ips = pcap_show(pcap)
 
@@ -58,7 +60,36 @@ def home():
                     new_row = {'IP': ip, 'Range': '192.0.0.0'}
                     private_df = private_df.append(new_row, ignore_index=True)
 
+    if sample:
 
+        f = open('Data/pycap_sample.json')
+        file_load = json.load(f)
+
+        packet = analyzer.stats(file_load)
+        link_chart(packet)
+
+        ip_cleanup(packet)
+
+        public_df = pd.DataFrame(columns=['IP', 'Lat', 'Lon'])
+        private_df = pd.DataFrame(columns=['IP', 'Range'])
+
+        for ip in packet['ips']:
+            try:
+                lat = packet['ips'][ip]['lat']
+                lon = packet['ips'][ip]['lon']
+                new_row = {'IP': ip, 'Lon': lon, 'Lat': lat}
+                public_df = public_df.append(new_row, ignore_index=True)
+
+            except:
+                if ip[0:3] == '10.':
+                    new_row = {'IP': ip, 'Range': '10.0.0.0'}
+                    private_df = private_df.append(new_row, ignore_index=True)
+                elif ip[0:4] == '172.':
+                    new_row = {'IP': ip, 'Range': '172.0.0.0'}
+                    private_df = private_df.append(new_row, ignore_index=True)
+                elif ip[0:4] == '192.':
+                    new_row = {'IP': ip, 'Range': '192.0.0.0'}
+                    private_df = private_df.append(new_row, ignore_index=True)
 
     with header:
         #st.title('Home Page')
