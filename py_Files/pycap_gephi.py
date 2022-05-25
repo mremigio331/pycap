@@ -40,3 +40,33 @@ def cap_to_gephi(filename,export_name):
     frame.to_csv(save_name, index=False)
 
     print('PCAP to Gephi completed')
+
+
+def cap_to_link_df(packets):
+
+    packet_connections =[]
+
+    time_bar = len(packets)
+
+    with alive_bar(time_bar) as bar:
+        for x in packets:
+            try:
+                source_ip = x['_source']['layers']['ip']['ip.src']
+                destination_ip = x['_source']['layers']['ip']['ip.dst']
+                protocal = x['_source']['layers']['frame']['frame.protocols'].split('ip:')[1]
+                line = {'Source': [source_ip],
+                        'Target': [destination_ip],
+                        'Type': ['Directed'],
+                        'Connection': [protocal]}
+                packet_info = pd.DataFrame(line)
+                packet_connections.append(packet_info)
+
+
+            except:
+                pass
+
+            bar()
+
+    frame = pd.concat(packet_connections, axis=0, ignore_index=True)
+
+    return frame

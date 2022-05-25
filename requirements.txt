@@ -1,3 +1,6 @@
 alive-progress
-streamlit
 geoip2
+networkx
+plotly
+pyshark
+streamlit
