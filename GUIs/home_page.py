@@ -37,28 +37,7 @@ def home():
     sample = st.sidebar.button('Sample Data')
 
     if analyze:
-        total_ips = pcap_show(pcap)
-
-        public_df = pd.DataFrame(columns=['IP', 'Lat', 'Lon'])
-        private_df = pd.DataFrame(columns=['IP', 'Range'])
-
-        for ip in total_ips['ips']:
-            try:
-                lat = total_ips['ips'][ip]['lat']
-                lon = total_ips['ips'][ip]['lon']
-                new_row = {'IP': ip, 'Lon': lon, 'Lat': lat}
-                public_df = public_df.append(new_row, ignore_index=True)
-
-            except:
-                if ip[0:3] == '10.':
-                    new_row = {'IP': ip, 'Range': '10.0.0.0'}
-                    private_df = private_df.append(new_row, ignore_index=True)
-                elif ip[0:4] == '172.':
-                    new_row = {'IP': ip, 'Range': '172.0.0.0'}
-                    private_df = private_df.append(new_row, ignore_index=True)
-                elif ip[0:4] == '192.':
-                    new_row = {'IP': ip, 'Range': '192.0.0.0'}
-                    private_df = private_df.append(new_row, ignore_index=True)
+        st.info('Please use sample. Currently working on allowing file uploads. Pull the master branch of pycap to run code on your own files.')
 
     if sample:
 
