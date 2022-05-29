@@ -51,6 +51,7 @@ def file_discovery_txt_output(packets,filename):
 
     print('Export Complete')
 
+
 def file_discovery_print_output(packets):
     total_ips = packets
     just_ips = total_ips['ips']
@@ -118,3 +119,156 @@ def file_discovery_json_output(packets,filename):
         json.dump(packets, f, ensure_ascii=False, indent=4)
 
     print('Export Complete')
+
+
+def stats_txt_output(stats,filename):
+
+    print('Exporting data to ' + filename)
+    packets = stats
+
+    with open(filename, 'w') as f:
+        f.write('Total Packets : ' + str(packets['statistics']['total_packets']) + '\n')
+        f.write('Total IPs : ' + str(packets['statistics']['total_ips']) + '\n')
+        f.write('Total Source IPs : ' + str(packets['statistics']['total_source_ips']) + '\n')
+        f.write('Total Destination IPs : ' + str(packets['statistics']['total_destination_ips']) + '\n')
+        f.write('Total Potential Names : ' + str(packets['statistics']['total_potential_names']) + '\n')
+        f.write('\n\n')
+        f.write('Individual IP Statistics \n\n')
+
+        for x in packets['ips']:
+
+            ip = x
+            names = packets['ips'][x]['name']
+            source_count = packets['ips'][x]['source_count']
+            destination_count = packets['ips'][x]['destination_count']
+            region = packets['ips'][x]['region']
+            country = packets['ips'][x]['country']
+
+            if region == 'Private IP':
+
+                try:
+                    name = str(names[0])
+                    name = name.split('.local')[0]
+                    f.write(name + '\n')
+                    f.write('     IP: ' + ip + '\n')
+                    f.write('     Potential Names: ' + str(names) + '\n')
+                    f.write('     Source Count: ' + str(source_count) + '\n')
+                    f.write('     Destination Count: ' + str(destination_count) + '\n')
+                    f.write('     Location: Private IP Address' + '\n')
+
+                except:
+                    f.write(ip + '\n')
+                    f.write('     ' + ip + '\n')
+                    f.write('     IP: ' + ip + '\n')
+                    f.write('     Potential Names: ' + str(names) + '\n')
+                    f.write('     Source Count: ' + str(source_count) + '\n')
+                    f.write('     Destination Count: ' + str(destination_count) + '\n')
+                    f.write('     Location: Private IP Address' + '\n')
+
+            else:
+
+                try:
+                    name = str(names[0])
+                    name = name.split('.local')[0]
+                    f.write(name + '\n')
+                    f.write('     IP: ' + ip + '\n')
+                    f.write('     Potential Names: ' + str(names) + '\n')
+                    f.write('     Source Count: ' + str(source_count) + '\n')
+                    f.write('     Destination Count: ' + str(destination_count) + '\n')
+                    f.write('     Location: ' + str(region) + ', ' + str(country) + '\n')
+
+                except:
+                    f.write(ip + '\n')
+                    f.write('     ' + ip + '\n')
+                    f.write('     IP: ' + ip + '\n')
+                    f.write('     Potential Names: ' + str(names) + '\n')
+                    f.write('     Source Count: ' + str(source_count) + '\n')
+                    f.write('     Destination Count: ' + str(destination_count) + '\n')
+                    f.write('     Location: ' + str(region) + ', ' + str(country) + '\n')
+
+            f.write('     Connections (' + str(len(packets['ips'][x]['connections'])) + ')\n')
+
+            for connection in packets['ips'][x]['connections']:
+                connection_ip = connection
+                connection_source = packets['ips'][x]['connections'][connection]['source_count']
+                connection_destination = packets['ips'][x]['connections'][connection]['destination_count']
+                f.write('     * ' + connection_ip + ': {Source: ' + str(connection_source) + ', Destination: ' +
+                        str(connection_destination) + '}\n')
+            f.write('\n')
+
+def streamlit_export_txt(packets):
+
+    full_str = []
+
+    full_str.append('Total Packets : ' + str(packets['statistics']['total_packets']) + '\n')
+    full_str.append('Total IPs : ' + str(packets['statistics']['total_ips']) + '\n')
+    full_str.append('Total Source IPs : ' + str(packets['statistics']['total_source_ips']) + '\n')
+    full_str.append('Total Destination IPs : ' + str(packets['statistics']['total_destination_ips']) + '\n')
+    full_str.append('Total Potential Names : ' + str(packets['statistics']['total_potential_names']) + '\n')
+    full_str.append('\n\n')
+    full_str.append('Individual IP Statistics \n\n')
+
+    for x in packets['ips']:
+
+        ip = x
+        names = packets['ips'][x]['name']
+        source_count = packets['ips'][x]['source_count']
+        destination_count = packets['ips'][x]['destination_count']
+        region = packets['ips'][x]['region']
+        country = packets['ips'][x]['country']
+
+        if region == 'Private IP':
+
+            try:
+                name = str(names[0])
+                name = name.split('.local')[0]
+                full_str.append(name + '\n')
+                full_str.append('     IP: ' + ip + '\n')
+                full_str.append('     Potential Names: ' + str(names) + '\n')
+                full_str.append('     Source Count: ' + str(source_count) + '\n')
+                full_str.append('     Destination Count: ' + str(destination_count) + '\n')
+                full_str.append('     Location: Private IP Address' + '\n')
+
+            except:
+                full_str.append(ip + '\n')
+                full_str.append('     ' + ip + '\n')
+                full_str.append('     IP: ' + ip + '\n')
+                full_str.append('     Potential Names: ' + str(names) + '\n')
+                full_str.append('     Source Count: ' + str(source_count) + '\n')
+                full_str.append('     Destination Count: ' + str(destination_count) + '\n')
+                full_str.append('     Location: Private IP Address' + '\n')
+
+        else:
+
+            try:
+                name = str(names[0])
+                name = name.split('.local')[0]
+                full_str.append(name + '\n')
+                full_str.append('     IP: ' + ip + '\n')
+                full_str.append('     Potential Names: ' + str(names) + '\n')
+                full_str.append('     Source Count: ' + str(source_count) + '\n')
+                full_str.append('     Destination Count: ' + str(destination_count) + '\n')
+                full_str.append('     Location: ' + str(region) + ', ' + str(country) + '\n')
+
+            except:
+                full_str.append(ip + '\n')
+                full_str.append('     ' + ip + '\n')
+                full_str.append('     IP: ' + ip + '\n')
+                full_str.append('     Potential Names: ' + str(names) + '\n')
+                full_str.append('     Source Count: ' + str(source_count) + '\n')
+                full_str.append('     Destination Count: ' + str(destination_count) + '\n')
+                full_str.append('     Location: ' + str(region) + ', ' + str(country) + '\n')
+
+        full_str.append('     Connections (' + str(len(packets['ips'][x]['connections'])) + ')\n')
+
+        for connection in packets['ips'][x]['connections']:
+            connection_ip = connection
+            connection_source = packets['ips'][x]['connections'][connection]['source_count']
+            connection_destination = packets['ips'][x]['connections'][connection]['destination_count']
+            full_str.append('     * ' + connection_ip + ': {Source: ' + str(connection_source) + ', Destination: ' +
+                            str(connection_destination) + '}\n')
+        full_str.append('\n')
+
+    full_report = ''.join(full_str)
+
+    return full_report

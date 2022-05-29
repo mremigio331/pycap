@@ -13,7 +13,7 @@ import json
 sys.path.append('py_Files')
 import pycap_analyzer as analyzer
 import pycap_conversion as cap_con
-import pycap_gephi as gephi
+import pycap_outputs as outputs
 
 
 
@@ -21,7 +21,7 @@ import pycap_gephi as gephi
 def home():
 
     header = st.container()
-    #dataset = st.container()
+
     global ip_map, link_map
 
     ip_map, link_map = st.columns(2)
@@ -32,67 +32,77 @@ def home():
 
     pcap = st.sidebar.file_uploader('pcap file',['pcap'])
 
-    analyze = st.sidebar.button('Analyze pcap')
+    analyze = st.sidebar.button('Analyze PCAP')
 
     sample = st.sidebar.button('Sample Data')
 
     if analyze:
-        total_ips = pcap_show(pcap)
-
-        public_df = pd.DataFrame(columns=['IP', 'Lat', 'Lon'])
-        private_df = pd.DataFrame(columns=['IP', 'Range'])
-
-        for ip in total_ips['ips']:
+        with st.spinner('Converting and Analyzing PCAP'):
             try:
-                lat = total_ips['ips'][ip]['lat']
-                lon = total_ips['ips'][ip]['lon']
-                new_row = {'IP': ip, 'Lon': lon, 'Lat': lat}
-                public_df = public_df.append(new_row, ignore_index=True)
+                total_ips = pcap_show(pcap)
+
+                public_df = pd.DataFrame(columns=['IP', 'Lat', 'Lon'])
+                private_df = pd.DataFrame(columns=['IP', 'Range'])
+
+                for ip in total_ips['ips']:
+                    try:
+                        lat = total_ips['ips'][ip]['lat']
+                        lon = total_ips['ips'][ip]['lon']
+                        new_row = {'IP': ip, 'Lon': lon, 'Lat': lat}
+                        public_df = public_df.append(new_row, ignore_index=True)
+
+                    except:
+                        if ip[0:3] == '10.':
+                            new_row = {'IP': ip, 'Range': '10.0.0.0'}
+                            private_df = private_df.append(new_row, ignore_index=True)
+                        elif ip[0:4] == '172.':
+                            new_row = {'IP': ip, 'Range': '172.0.0.0'}
+                            private_df = private_df.append(new_row, ignore_index=True)
+                        elif ip[0:4] == '192.':
+                            new_row = {'IP': ip, 'Range': '192.0.0.0'}
+                            private_df = private_df.append(new_row, ignore_index=True)
 
             except:
-                if ip[0:3] == '10.':
-                    new_row = {'IP': ip, 'Range': '10.0.0.0'}
-                    private_df = private_df.append(new_row, ignore_index=True)
-                elif ip[0:4] == '172.':
-                    new_row = {'IP': ip, 'Range': '172.0.0.0'}
-                    private_df = private_df.append(new_row, ignore_index=True)
-                elif ip[0:4] == '192.':
-                    new_row = {'IP': ip, 'Range': '192.0.0.0'}
-                    private_df = private_df.append(new_row, ignore_index=True)
+                error = traceback.format_exc()
+                if 'NoneType' in error:
+                    st.error('Please drag and drop or select a file locally before running Analyze PCAP')
+                else:
+                    st.error('There was an error analyzing the file. Check and confirm it is a pcap')
 
     if sample:
 
-        f = open('Data/pycap_sample.json')
-        file_load = json.load(f)
+        with st.spinner('Loading Sample Data'):
+            f = open('Data/pycap_sample.json')
+            file_load = json.load(f)
 
-        packet = analyzer.stats(file_load)
-        link_chart(packet)
+            packet = analyzer.stats(file_load)
+            link_chart(packet)
 
-        ip_cleanup(packet)
+            ip_cleanup(packet)
 
-        public_df = pd.DataFrame(columns=['IP', 'Lat', 'Lon'])
-        private_df = pd.DataFrame(columns=['IP', 'Range'])
+            public_df = pd.DataFrame(columns=['IP', 'Lat', 'Lon'])
+            private_df = pd.DataFrame(columns=['IP', 'Range'])
 
-        for ip in packet['ips']:
-            try:
-                lat = packet['ips'][ip]['lat']
-                lon = packet['ips'][ip]['lon']
-                new_row = {'IP': ip, 'Lon': lon, 'Lat': lat}
-                public_df = public_df.append(new_row, ignore_index=True)
+            for ip in packet['ips']:
+                try:
+                    lat = packet['ips'][ip]['lat']
+                    lon = packet['ips'][ip]['lon']
+                    new_row = {'IP': ip, 'Lon': lon, 'Lat': lat}
+                    public_df = public_df.append(new_row, ignore_index=True)
 
-            except:
-                if ip[0:3] == '10.':
-                    new_row = {'IP': ip, 'Range': '10.0.0.0'}
-                    private_df = private_df.append(new_row, ignore_index=True)
-                elif ip[0:4] == '172.':
-                    new_row = {'IP': ip, 'Range': '172.0.0.0'}
-                    private_df = private_df.append(new_row, ignore_index=True)
-                elif ip[0:4] == '192.':
-                    new_row = {'IP': ip, 'Range': '192.0.0.0'}
-                    private_df = private_df.append(new_row, ignore_index=True)
+                except:
+                    if ip[0:3] == '10.':
+                        new_row = {'IP': ip, 'Range': '10.0.0.0'}
+                        private_df = private_df.append(new_row, ignore_index=True)
+                    elif ip[0:4] == '172.':
+                        new_row = {'IP': ip, 'Range': '172.0.0.0'}
+                        private_df = private_df.append(new_row, ignore_index=True)
+                    elif ip[0:4] == '192.':
+                        new_row = {'IP': ip, 'Range': '192.0.0.0'}
+                        private_df = private_df.append(new_row, ignore_index=True)
+
 
     with header:
-        #st.title('Home Page')
 
         ip_map.markdown("<h2 style='text-align: center; '> Public IP Map </h2>", unsafe_allow_html=True)
         ip_map.pydeck_chart(
@@ -131,17 +141,20 @@ def home():
 
 def pcap_show(pcap):
 
-    with open(os.path.join(pcap.name), "wb") as f:
+    filepath = 'Data/holding_area/' + pcap.name
+    with open(os.path.join(filepath), "wb") as f:
         f.write(pcap.getbuffer())
 
-    packets = cap_con.pcap_to_json(pcap.name)
+    packets = cap_con.pcap_to_json(filepath)
 
     packet = analyzer.stats(packets)
+    st.success('PCAP Analyzation Successful')
     link_chart(packet)
 
-    os.remove(pcap.name)
+    os.remove(filepath)
     ip_cleanup(packet)
     return packet
+
 
 def ip_cleanup(packets):
     st.title('PCAP Statistics')
@@ -272,6 +285,9 @@ def ip_cleanup(packets):
                                str(connection_destination) + '}')
 
             side = 'left'
+
+    report = outputs.streamlit_export_txt(packets)
+    st.sidebar.download_button('Download Report', report, file_name = 'streamlit_report.txt')
 
 
 def link_chart(packet):
@@ -429,3 +445,4 @@ def link_chart(packet):
     fig = go.Figure(data = data, layout = layout)
 
     link_map.plotly_chart(fig, use_container_width = True)
+

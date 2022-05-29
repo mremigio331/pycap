@@ -2,6 +2,8 @@ import sys
 sys.setrecursionlimit(50000)
 from alive_progress import alive_bar, config_handler
 import geoip2.database
+from stqdm import stqdm
+import streamlit as st
 
 try:
     from py_Files import pycap_analyzer as lyzer, pycap_gephi as geph, pycap_conversion as cap_con
@@ -16,7 +18,7 @@ def analyzer_loop(pcaps,name_lookup):
 
     time_bar = len(pcaps)
     with alive_bar(time_bar) as bar:
-        for x in pcaps:
+        for x in stqdm(pcaps, desc='Analyzing All Auth_Logs'):
             try:
                 source_ip = x['_source']['layers']['ip']['ip.src']
                 destination_ip = x['_source']['layers']['ip']['ip.addr']
