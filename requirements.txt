@@ -4,3 +4,4 @@ networkx
 plotly
 pyshark
 streamlit
+stqdm
