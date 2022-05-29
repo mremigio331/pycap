@@ -4,6 +4,7 @@ import json
 
 def pcap_to_json(pcap):
     print('Converting PCAP to JSON...')
+
     tshark = 'tshark -r ' + pcap + ' -T json > Data/holding_area/output.json'
     os.system(tshark)
 
