@@ -4,6 +4,8 @@ from alive_progress import alive_bar, config_handler
 import geoip2.database
 from stqdm import stqdm
 import streamlit as st
+import traceback
+import pandas as pd
 
 try:
     from py_Files import pycap_analyzer as lyzer, pycap_gephi as geph, pycap_conversion as cap_con
@@ -11,6 +13,9 @@ except:
     import pycap_analyzer as lyzer, pycap_gephi as geph, pycap_conversion as cap_con
 
 def analyzer_loop(pcaps,name_lookup):
+    tcp = pd.read_csv('Data/tcp.csv', index_col=None, header=0)
+    udp = pd.read_csv('Data/udp.csv', index_col=None, header=0)
+
     total_ips = {'ips': {}}
     source_ips_list = []
     destination_ips_list = []
@@ -23,6 +28,9 @@ def analyzer_loop(pcaps,name_lookup):
                 source_ip = x['_source']['layers']['ip']['ip.src']
                 destination_ip = x['_source']['layers']['ip']['ip.addr']
                 src_host = x['_source']['layers']['ip']['ip.src_host']
+                source_port = str(x['_source']['layers']).split('srcport')[1].split("',")[0].replace("'","").replace('"','').replace(': ','')
+                dest_port = str(x['_source']['layers']).split('dstport')[1].split("',")[0].replace("'","").replace('"','').replace(': ','')
+                protocol = list(x['_source']['layers'].keys())[3]
 
                 if source_ip in total_ips['ips']:
                     source_count = total_ips['ips'][source_ip]['source_count']
@@ -58,6 +66,41 @@ def analyzer_loop(pcaps,name_lookup):
                         total_ips['ips'][source_ip]['connections'].update({destination_ip: {'source_count': 0,
                                                                                             'destination_count': 1}})
 
+                    if source_port in total_ips['ips'][source_ip]['ports']:
+                        count = total_ips['ips'][source_ip]['ports'][source_port]['source_count']
+                        new_count = count + 1
+                        total_ips['ips'][source_ip]['ports'][source_port].update({'source_count': new_count})
+
+                    else:
+
+                        if protocol == 'tcp':
+                            try:
+                                des = tcp[tcp['Port'] == str(source_port)]['Description'].tolist()
+                                service = tcp[tcp['Port'] == str(source_port)]['Service'].tolist()
+
+                                des = des[0]
+                                service = service[0]
+                            except:
+                                error = traceback.format_exc(), protocol, source_port
+                                des = 'N/A'
+                                service = 'N/A'
+                        else:
+                            try:
+                                des = udp[udp['Port'] == str(source_port)]['Description'].tolist()
+                                service = udp[udp['Port'] == str(source_port)]['Service'].tolist()
+
+                                des = des[0]
+                                service = service[0]
+                            except:
+                                error = traceback.format_exc()
+                                des = 'N/A'
+                                service = 'N/A'
+
+                        total_ips['ips'][source_ip]['ports'].update({source_port: {'service': service,
+                                                                                   'description': des,
+                                                                                   'source_count': 1,
+                                                                                   'destination_count': 0}})
+
                 if destination_ip in total_ips['ips']:
                     if destination_ip not in destination_ips_list:
                         destination_ips_list.append(destination_ip)
@@ -72,14 +115,72 @@ def analyzer_loop(pcaps,name_lookup):
                         total_ips['ips'][destination_ip]['connections'][source_ip].update({'source_count': new_count})
 
                     if source_ip not in total_ips['ips'][destination_ip]['connections']:
-                        total_ips['ips'][destination_ip]['connections'][source_ip].update(
-                            {source_ip: {'source_count': 1,
-                                         'destination_count': 0}})
+                        total_ips['ips'][destination_ip]['connections'].update({source_ip: {'source_count': 1,
+                                                                                            'destination_count': 0}})
+
+                    if dest_port in total_ips['ips'][destination_ip]['ports']:
+                        count = total_ips['ips'][destination_ip]['ports'][dest_port]['destination_count']
+                        new_count = count + 1
+                        total_ips['ips'][destination_ip]['ports'][dest_port].update({'destination_count': new_count})
+
+                    else:
+
+                        if protocol == 'tcp':
+                            try:
+                                des = tcp[tcp['Port'] == str(dest_port)]['Description'].tolist()
+                                service = tcp[tcp['Port'] == str(dest_port)]['Service'].tolist()
+
+                                des = des[0]
+                                service = service[0]
+                            except:
+                                error = traceback.format_exc()
+                                des = 'N/A'
+                                service = 'N/A'
+                        else:
+                            try:
+                                des = udp[udp['Port'] == str(dest_port)]['Description'].tolist()
+                                service = udp[udp['Port'] == str(dest_port)]['Service'].tolist()
+
+                                des = des[0]
+                                service = service[0]
+                            except:
+                                error = traceback.format_exc()
+                                des = 'N/A'
+                                service = 'N/A'
+
+                        total_ips['ips'][destination_ip]['ports'].update({dest_port: {'service': service,
+                                                                                      'description': des,
+                                                                                      'source_count': 0,
+                                                                                      'destination_count': 1}})
 
                 if source_ip not in total_ips['ips']:
 
                     if source_ip not in source_ips_list:
                         source_ips_list.append(source_ip)
+                    else:
+                        pass
+
+                    if protocol == 'tcp':
+                        try:
+                            des = tcp[tcp['Port'] == str(source_port)]['Description'].tolist()
+                            service = tcp[tcp['Port'] == str(source_port)]['Service'].tolist()
+
+                            des = des[0]
+                            service = service[0]
+                        except:
+                            error = traceback.format_exc()
+                            des = 'N/A'
+                            service = 'N/A'
+                    else:
+                        try:
+                            des = udp[udp['Port'] == str(source_port)]['Description'].tolist()
+                            service = udp[udp['Port'] == str(source_port)]['Service'].tolist()
+
+                            des = des[0]
+                            service = service[0]
+                        except:
+                            des = 'N/A'
+                            service = 'N/A'
 
                     source_ip_info = {source_ip: {'ip': source_ip,
                                                   'name': '',
@@ -89,6 +190,10 @@ def analyzer_loop(pcaps,name_lookup):
                                                   'virus_total': '',
                                                   'country': '',
                                                   'region': '',
+                                                  'ports': {source_port: {'service': service,
+                                                                          'description': des,
+                                                                          'source_count': 1,
+                                                                          'destination_count': 0}},
                                                   'connections': {destination_ip: {'source_count': 0,
                                                                                    'destination_count': 1}
                                                                   }}}
@@ -111,8 +216,35 @@ def analyzer_loop(pcaps,name_lookup):
                             pass
 
                 if destination_ip not in total_ips['ips']:
+
                     if destination_ip not in destination_ips_list:
                         destination_ips_list.append(destination_ip)
+
+                    else:
+                        pass
+
+                    if protocol == 'tcp':
+                        try:
+                            des = tcp[tcp['Port'] == str(dest_port)]['Description'].tolist()
+                            service = tcp[tcp['Port'] == str(dest_port)]['Service'].tolist()
+
+                            des = des[0]
+                            service = service[0]
+                        except:
+                            error = traceback.format_exc()
+                            des = 'N/A'
+                            service = 'N/A'
+                    else:
+                        try:
+                            des = udp[udp['Port'] == str(dest_port)]['Description'].tolist()
+                            service = udp[udp['Port'] == str(dest_port)]['Service'].tolist()
+
+                            des = des[0]
+                            service = service[0]
+                        except:
+                            error = traceback.format_exc()
+                            des = 'N/A'
+                            service = 'N/A'
 
                     destination_ip_info = {destination_ip: {'ip': destination_ip,
                                                             'name': '',
@@ -122,13 +254,17 @@ def analyzer_loop(pcaps,name_lookup):
                                                             'virus_total': '',
                                                             'country': '',
                                                             'region': '',
+                                                            'ports': {dest_port: {'service': service,
+                                                                                  'description': des,
+                                                                                  'source_count': 0,
+                                                                                  'destination_count': 1}},
                                                             'connections': {source_ip: {'source_count': 1,
                                                                                         'destination_count': 0}
                                                                             }}}
                     total_ips['ips'].update(destination_ip_info)
 
             except:
-                pass
+                error = traceback.format_exc()
 
             bar()
 
